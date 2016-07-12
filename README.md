@@ -4,6 +4,8 @@
 
 将网页背景色改为护眼灰，需要配合`browser.display.background_color;#DCDCDC`使用
 
+脚本安装地址：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/21321)、[GitHub](https://github.com/sakuyaa/gm_scripts/raw/master/grayBackgroundColor.user.js)
+
 ### 具体说明
 * 该脚本将RGB值均高于215的网页元素的背景色改为护眼灰，分别将RGB三个值按比例压缩，使得原有不同颜色的网页背景色在改变之后可以进行区分
 * 一些网站没有指定背景颜色，则需要火狐改变默认背景色（默认白色），将`browser.display.background_color`的值改为`#DCDCDC`
