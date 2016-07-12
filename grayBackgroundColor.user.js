@@ -1,4 +1,14 @@
 // ==UserScript==
+// @name			grayBackgroundColor
+// @namespace	https://github.com/sakuyaa/gm_scripts
+// @author			sakuyaa
+// @description	将网页背景色改为护眼灰
+// @include			*
+// @version			1.0
+// @compatible	firefox 22
+// @grant			GM_addStyle
+// @note				配合browser.display.background_color;#DCDCDC使用
+// @run-at			document-end
 // ==/UserScript==
 (function() {
 	var grayValue = 215;
