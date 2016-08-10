@@ -1,7 +1,10 @@
 # gm_scripts by sakuyaa
 
-## grayBackgroundColor.user.js
+## [scrollWithMouseMove.user.js](https://github.com/sakuyaa/gm_scripts/raw/master/scrollWithMouseMove.user.js)
+鼠标在滚动条上移动即可滚动网页（也只能是网页右侧的滚动条），移动距离即为滚动条移动距离<br />
+`修改自Mozest.com社区的脚本ScrollWithMouse.uc.js`
 
+## [grayBackgroundColor.user.js](https://github.com/sakuyaa/gm_scripts/raw/master/grayBackgroundColor.user.js)
 将网页背景色改为护眼灰，需要配合`browser.display.background_color;#DCDCDC`使用
 
 脚本安装地址：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/21321)、[GitHub](https://github.com/sakuyaa/gm_scripts/raw/master/grayBackgroundColor.user.js)
