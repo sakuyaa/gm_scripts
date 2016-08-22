@@ -3,10 +3,11 @@
 // @namespace	https://github.com/sakuyaa/gm_scripts
 // @description	鼠标在滚动条上移动滚动网页
 // @include		*
-// @version		2016.8.9
+// @version		2016.8.22
+// @grant		none
 // @note		修改自原脚本ScrollWithMouse.uc.js，来自Mozest.com社区
 // @note		modify by sakuyaa
-// @run-at		document-end
+// @run-at		document-start
 // ==/UserScript==
 (function() {
 	var scrolling = false;   //处于滚动条位置
@@ -19,19 +20,17 @@
 		scrollStartY = event.screenY;   //储存下次移动起点高度
 	}
 
-	setTimeout(() => {
-		document.addEventListener('mouseover', e => {
-			if (e.clientX >= document.documentElement.clientWidth && !scrolling) {   //处于滚动条位置
-				scrolling = true;
-				window.addEventListener('mousemove', mouseScroll, true)
-			}
-		}, false);
-		document.addEventListener('mouseout', e => {   //移出滚动条
-			if (scrolling) {
-				scrolling = false;
-				scrollStartY = -1;
-				window.removeEventListener('mousemove', mouseScroll, true)
-			}
-		}, false);
-	}, 1000);
+	document.addEventListener('mouseover', e => {
+		if (e.clientX >= document.documentElement.clientWidth && !scrolling) {   //处于滚动条位置
+			scrolling = true;
+			window.addEventListener('mousemove', mouseScroll, true)
+		}
+	}, false);
+	document.addEventListener('mouseout', e => {   //移出滚动条
+		if (scrolling) {
+			scrolling = false;
+			scrollStartY = -1;
+			window.removeEventListener('mousemove', mouseScroll, true)
+		}
+	}, false);
 })();
