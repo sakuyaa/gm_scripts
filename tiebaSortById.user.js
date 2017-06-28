@@ -2,10 +2,10 @@
 // @name		tiebaSortById
 // @namespace	https://github.com/sakuyaa/gm_scripts
 // @description	百度贴吧按发帖时间（帖子ID）排序
-// @include		/^https?:\/\/tieba\.baidu\.com\/f\?.*$/
-// @version		2016.9.20
+// @include		http*://tieba.baidu.com/f?*
+// @version		2017.6.28
 // @grant		none
-// @run-at		document-end
+// @run-at		document-start
 // ==/UserScript==
 (function() {
 	function sortById() {
@@ -31,13 +31,17 @@
 		}
 	}
 	
-	setTimeout(() => {
-		var a = document.createElement('a');
-		a.textContent = '按发帖时间排序';
-		a.setAttribute('href', 'javascript:;');
-		a.addEventListener('click', e => {
-			sortById();
-		}, false);
-		document.getElementsByClassName('card_infoNum')[0].parentNode.appendChild(a);
+	var code = setInterval(() => {
+		var node = document.getElementsByClassName('card_infoNum');
+		if (node.length) {
+			clearInterval(code);
+			var a = document.createElement('a');
+			a.textContent = '按发帖时间排序';
+			a.setAttribute('href', 'javascript:;');
+			a.addEventListener('click', e => {
+				sortById();
+			}, false);
+			node[0].parentNode.appendChild(a);
+		}
 	}, 500);
 })();
