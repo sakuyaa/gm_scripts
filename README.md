@@ -1,5 +1,8 @@
 # gm_scripts by sakuyaa
 
+## [bilibiliDanmaku.user.js](https://github.com/sakuyaa/gm_scripts/raw/master/bilibiliDanmaku.user.js)
+在哔哩哔哩视频标题下方增加弹幕查看和下载
+
 ## [grayBackgroundColor.user.js](https://github.com/sakuyaa/gm_scripts/raw/master/grayBackgroundColor.user.js)
 将网页背景色改为护眼灰，需要配合`browser.display.background_color;#DCDCDC`使用
 
