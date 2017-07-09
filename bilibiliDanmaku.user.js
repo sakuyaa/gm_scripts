@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name		bilibiliDanmaku
+// @name:zh-CN	哔哩哔哩弹幕姬
 // @namespace	https://github.com/sakuyaa/gm_scripts
 // @author		sakuyaa
 // @description	在哔哩哔哩视频标题下方增加弹幕查看和下载
 // @include		http*://www.bilibili.com/video/av*
-// @version		2017.7.8
+// @version		2017.7.9
 // @grant		none
 // @run-at		document-end
 // ==/UserScript==
@@ -24,16 +25,16 @@
 			let download = document.createElement('a');
 			download.setAttribute('href', 'javascript:;');
 			download.textContent = '下载弹幕';
-			download.addEventListener('click', () => {
+			download.addEventListener('click', function getDanmaku() {
 				let xhr = new XMLHttpRequest();
 				xhr.responseType = 'blob';
 				xhr.open('GET', 'https://comment.bilibili.com/' + window.cid + '.xml', true);
 				xhr.onload = () => {
 					if (xhr.status == 200) {
-						let a = document.createElement('a');
-						a.setAttribute('download', document.title.split('_')[0] + '.xml');
-						a.setAttribute('href', URL.createObjectURL(xhr.response));
-						a.dispatchEvent(new MouseEvent('click'));
+						download.removeEventListener('click', getDanmaku, false);
+						download.setAttribute('download', document.title.split('_')[0] + '.xml');
+						download.setAttribute('href', URL.createObjectURL(xhr.response));
+						download.dispatchEvent(new MouseEvent('click'));
 					} else {
 						console.log(new Error(xhr.statusText));
 					}
