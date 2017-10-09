@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name		tiebaSortById
 // @namespace	https://github.com/sakuyaa/gm_scripts
+// @author		sakuyaa
 // @description	百度贴吧按发帖时间（帖子ID）排序
-// @include		http*://tieba.baidu.com/f?*
-// @version		2017.6.28
+// @include		http*://tieba.baidu.com/f*
+// @version		2017.10.8
 // @grant		none
 // @run-at		document-start
 // ==/UserScript==
