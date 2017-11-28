@@ -5,7 +5,8 @@
 // @author		sakuyaa
 // @description	在哔哩哔哩视频标题下方增加弹幕查看和下载
 // @include		http*://www.bilibili.com/video/av*
-// @version		2017.7.9
+// @include		http*://www.bilibili.com/watchlater/#/av*
+// @version		2017.11.28
 // @grant		none
 // @run-at		document-end
 // ==/UserScript==
