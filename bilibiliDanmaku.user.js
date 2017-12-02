@@ -6,7 +6,7 @@
 // @description	在哔哩哔哩视频标题下方增加弹幕查看和下载
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
-// @version		2017.11.30
+// @version		2017.12.2
 // @grant		none
 // @run-at		document-end
 // ==/UserScript==
@@ -30,13 +30,13 @@
 				view.setAttribute('href', 'https://comment.bilibili.com/' + window.cid + '.xml');
 				download.removeAttribute('download');
 				download.setAttribute('href', 'javascript:;');
-				download.addEventListener('click', function getDanmaku() {
+				download.onclick = () => {
 					let xhr = new XMLHttpRequest();
 					xhr.responseType = 'blob';
 					xhr.open('GET', 'https://comment.bilibili.com/' + window.cid + '.xml?bilibiliDanmaku', true);
 					xhr.onload = () => {
 						if (xhr.status == 200) {
-							download.removeEventListener('click', getDanmaku, false);
+							download.onclick = null;
 							download.setAttribute('download', document.title.split('_')[0] + '.xml');
 							download.setAttribute('href', URL.createObjectURL(xhr.response));
 							download.dispatchEvent(new MouseEvent('click'));
@@ -45,7 +45,7 @@
 						}
 					};
 					xhr.send(null);
-				}, false);
+				};
 			};
 			
 			func();
