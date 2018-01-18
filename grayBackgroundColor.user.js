@@ -4,7 +4,7 @@
 // @author		sakuyaa
 // @description	将网页背景色改为护眼灰
 // @include		*
-// @version		2016.8.22
+// @version		2018.1.18
 // @compatible	firefox 22
 // @grant		GM_addStyle
 // @note		配合browser.display.background_color;#DCDCDC使用
@@ -14,19 +14,30 @@
 	var grayValue = 215;
 	
 	function grayElem(elem) {   //将元素变灰
-		var elemStyle = window.getComputedStyle(elem, null);
+		var elemStyle = window.getComputedStyle(elem);
 		if (!elemStyle) {
 			return;
 		}
-		if (elemStyle.backgroundColor != 'transparent') {
-			var RGBValues = elemStyle.backgroundColor.match(/\d+/g);
-			var red = RGBValues[0];
-			var green = RGBValues[1];
-			var blue = RGBValues[2];
-
+		var rgbaValues = elemStyle.getPropertyValue('background-color').match(/\d+(\.\d+)?/g);
+		if (rgbaValues) {
+			var red = rgbaValues[0];
+			var green = rgbaValues[1];
+			var blue = rgbaValues[2];
+			if (red < grayValue || green < grayValue || blue < grayValue) {
+				return;
+			}
 			//从215-255压缩到215-225
-			if (red >= grayValue && green >= grayValue && blue >= grayValue) {
-				elem.style.backgroundColor = 'rgb( ' + Math.floor((red - grayValue) / 4 + grayValue) + ', ' + Math.floor((green - grayValue) / 4 + grayValue) + ', ' + Math.floor((blue - grayValue) / 4 + grayValue) + ')';
+			if (rgbaValues[3]) {   //有alpha值
+				elem.style.backgroundColor = 'rgba( ' +
+					Math.floor((red - grayValue) / 4 + grayValue) + ', ' +
+					Math.floor((green - grayValue) / 4 + grayValue) + ', ' +
+					Math.floor((blue - grayValue) / 4 + grayValue) + ', ' +
+					rgbaValues[3] + ')';
+			} else {
+				elem.style.backgroundColor = 'rgb( ' +
+					Math.floor((red - grayValue) / 4 + grayValue) + ', ' +
+					Math.floor((green - grayValue) / 4 + grayValue) + ', ' +
+					Math.floor((blue - grayValue) / 4 + grayValue) + ')';
 			}
 		}
 	}
@@ -59,7 +70,7 @@
 			return;
 		}
 		var herf = window.location.href;
-		if (/^https?:\/\/tieba\.baidu\.com\/f\?.+/i.test(herf)) {
+		if (/^https?:\/\/tieba\.baidu\.com\/f.+/i.test(herf)) {
 			GM_addStyle('.forum_content {background: #dcdcdc none !important;}');
 		}
 	}
