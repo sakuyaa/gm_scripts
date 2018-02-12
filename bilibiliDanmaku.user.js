@@ -6,12 +6,13 @@
 // @description	在哔哩哔哩视频标题下方增加弹幕查看和下载
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
-// @version		2018.2.11
+// @version		2018.2.12
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
 // ==/UserScript==
 (function() {
+	const MAX_CONNECTIONS = 50;   //最大并发连接数
 	let fetchFunc = url => {
 		return fetch(url).then(response => {
 			if(response.ok) {
@@ -74,8 +75,8 @@
 						if(!response.ok) {
 							throw new Error('无法加载历史弹幕列表');
 						}
-						//进度条
 						let dates = await response.json();
+						//进度条
 						let progress = document.createElement('progress');
 						progress.setAttribute('max', dates.length);
 						progress.setAttribute('value', 0);
@@ -83,21 +84,24 @@
 						progress.style.margin = 'auto';
 						progress.style.left = progress.style.right = 0;
 						progress.style.top = progress.style.bottom = 0;
-						progress.style.zIndex = 99;
+						progress.style.zIndex = 99;   //进度条置顶
 						document.body.appendChild(progress);
 						//并发获取
-						let danmakuMap = new Map();
-						for (let i = 0; i < dates.length; i += 50) {
+						let exp, match, danmakuAll = '', index = 0, currentIndex;
+						for (let i = 0; i < dates.length; i += MAX_CONNECTIONS) {
 							let array = [];
-							for (let date of dates.slice(i, i + 50)) {
+							for (let date of dates.slice(i, i + MAX_CONNECTIONS)) {
 								array.push(fetchFunc('https://comment.bilibili.com/dmroll,' + date.timestamp +
 									',' + window.cid + '?bilibiliDanmaku'));
 							}
-							let exp, match;
 							for (let danmaku of await Promise.all(array)) {
 								exp = new RegExp('<d p="[^"]+,(\\d+)">.+?</d>', 'g');
 								while ((match = exp.exec(danmaku)) != null) {
-									danmakuMap.set(match[1], match[0]);
+									currentIndex = parseInt(match[1]);
+									if (currentIndex > index) {   //跳过重复的项目
+										index = currentIndex;
+										danmakuAll += match[0] + '\n';
+									}
 								}
 							}
 							progress.setAttribute('value', i);   //最后剩下当前弹幕池
@@ -105,20 +109,21 @@
 						//加载当前弹幕池
 						let danmaku = await fetchFunc('https://comment.bilibili.com/' + window.cid +
 							'.xml?bilibiliDanmaku');
-						let exp = new RegExp('<d p="[^"]+,(\\d+)">.+?</d>', 'g');
-						let match;
+						exp = new RegExp('<d p="[^"]+,(\\d+)">.+?</d>', 'g');
 						while ((match = exp.exec(danmaku)) != null) {
-							danmakuMap.set(match[1], match[0]);
+							currentIndex = parseInt(match[1]);
+							if (currentIndex > index) {   //跳过重复的项目
+								index = currentIndex;
+								danmakuAll += match[0] + '\n';
+							}
 						}
 						//合成弹幕
 						document.body.removeChild(progress);
-						let danmakuAll = danmaku.substring(0, danmaku.indexOf('<d p='));   //文件头
-						danmakuMap.forEach(value => {
-							danmakuAll += value + '\n';
-						});
+						danmakuAll = danmaku.substring(0, danmaku.indexOf('<d p=')) + danmakuAll + '</i>';
+						//设置下载链接
 						downloadAll.onclick = null;
 						downloadAll.setAttribute('download', document.title.split('_')[0] + '.xml');
-						downloadAll.setAttribute('href', URL.createObjectURL(new Blob([danmakuAll + '</i>'])));
+						downloadAll.setAttribute('href', URL.createObjectURL(new Blob([danmakuAll])));
 						downloadAll.dispatchEvent(new MouseEvent('click'));
 					} catch(e) {
 						console.log(e);
