@@ -6,7 +6,7 @@
 // @description	在哔哩哔哩视频标题下方增加弹幕查看和下载
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
-// @version		2018.2.12
+// @version		2018.2.18
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -66,16 +66,23 @@
 				downloadAll.removeAttribute('download');
 				downloadAll.setAttribute('href', 'javascript:;');
 				downloadAll.onclick = async () => {
-					if (!confirm('全弹幕下载需要占用较大的资源（CPU、网络、时间等），视频投稿时间越早需要的时间越多，是否继续？')) {
-						return;
-					}
 					try {
 						//加载历史弹幕池
 						let response = await fetch('https://comment.bilibili.com/rolldate,' + window.cid);
 						if(!response.ok) {
 							throw new Error('无法加载历史弹幕列表');
 						}
-						let dates = await response.json();
+						let dates;
+						try {
+							dates = await response.json();
+						} catch(e) {   //无历史弹幕，直接下载当前弹幕池弹幕
+							download.dispatchEvent(new MouseEvent('click'));
+							return;
+						}
+						if (dates.length > MAX_CONNECTIONS && !confirm('投稿时间越早/弹幕越多，全弹幕下载耗时越多，是否继续？')) {
+							return;
+						}
+						
 						//进度条
 						let progress = document.createElement('progress');
 						progress.setAttribute('max', dates.length);
