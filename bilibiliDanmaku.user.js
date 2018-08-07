@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/bangumi/play/ep*
-// @version		2018.8.7
+// @version		2018.8.7.1
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -86,7 +86,7 @@
 						year++;
 					}
 				}
-				if(!comfirm('由于网站弹幕接口改版新的API限制获取速度，全弹幕下载需要有获取间隔，导致该功能需要很长很长时间进行弹幕获取（视投稿时间而定，每天都有历史数据的话获取一个月大概需要20多秒）')) {
+				if(!confirm('由于网站弹幕接口改版新的API限制获取速度，全弹幕下载需要有获取间隔，导致该功能需要很长很长时间进行弹幕获取（视投稿时间而定，每天都有历史数据的话获取一个月大概需要20多秒）')) {
 					return;
 				}
 				//进度条
