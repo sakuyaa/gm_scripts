@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/bangumi/play/ep*
-// @version		2018.8.7.1
+// @version		2018.8.8
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -86,7 +86,13 @@
 						year++;
 					}
 				}
-				if(!confirm('由于网站弹幕接口改版新的API限制获取速度，全弹幕下载需要有获取间隔，导致该功能需要很长很长时间进行弹幕获取（视投稿时间而定，每天都有历史数据的话获取一个月大概需要20多秒）')) {
+				//增加延迟
+				let delay;
+				if((delay = prompt('由于网站弹幕接口改版新的API限制获取速度，全弹幕下载需要有获取间隔，会导致该功能需要很长很长时间进行弹幕获取（视投稿时间而定，每天都有历史数据的话获取一个月大概需要20多秒），请输入获取间隔（若仍出现获取速度过快请适当加大间隔，单位：毫秒）', 299)) == null) {
+					return;
+				}
+				if(isNaN(delay)) {
+					alert('输入值不是数值！');
 					return;
 				}
 				//进度条
@@ -108,7 +114,7 @@
 					}
 					if (data.data) {
 						for (let date of data.data) {
-							await sleep(299);   //避免网站API调用速度过快导致错误
+							await sleep(delay);   //避免网站API调用速度过快导致错误
 							danmaku = await fetchFunc(`https://api.bilibili.com/x/v2/dm/history?type=1&oid=${window.cid}&date=${date}&bilibiliDanmaku=1`);
 							if ((match = (new RegExp('^\{"code":[^,]+,"message":"([^"]+)","ttl":[^\}]+\}$',)).exec(danmaku)) != null) {
 								throw new Error('bilibiliDanmaku，API接口返回错误：' + match[1]);
