@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/bangumi/play/ep*
-// @version		2018.8.8
+// @version		2018.8.9
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -97,7 +97,7 @@
 				}
 				//进度条
 				let progress = document.createElement('progress');
-				progress.setAttribute('max', monthArray.length);
+				progress.setAttribute('max', monthArray.length * 1000);
 				progress.setAttribute('value', 0);
 				progress.style.position = 'fixed';
 				progress.style.margin = 'auto';
@@ -107,15 +107,16 @@
 				document.body.appendChild(progress);
 				//获取历史弹幕日期
 				let data;
-				for (let i = 0; i < monthArray.length; i++) {
+				for (let i = 0; i < monthArray.length;) {
 					data = await fetchFunc(monthArray[i], true);
 					if (data.code) {
 						throw new Error('bilibiliDanmaku，API接口返回错误：' + data.message);
 					}
 					if (data.data) {
-						for (let date of data.data) {
+						for (let j = 0; j < data.data.length; j++) {
+							progress.setAttribute('value', i * 1000 + 1000 / data.data.length * j);
 							await sleep(delay);   //避免网站API调用速度过快导致错误
-							danmaku = await fetchFunc(`https://api.bilibili.com/x/v2/dm/history?type=1&oid=${window.cid}&date=${date}&bilibiliDanmaku=1`);
+							danmaku = await fetchFunc(`https://api.bilibili.com/x/v2/dm/history?type=1&oid=${window.cid}&date=${data.data[j]}&bilibiliDanmaku=1`);
 							if ((match = (new RegExp('^\{"code":[^,]+,"message":"([^"]+)","ttl":[^\}]+\}$',)).exec(danmaku)) != null) {
 								throw new Error('bilibiliDanmaku，API接口返回错误：' + match[1]);
 							}
@@ -127,7 +128,7 @@
 							}
 						}
 					}
-					progress.setAttribute('value', i + 1);
+					progress.setAttribute('value', ++i * 1000);
 				}
 				//按弹幕播放时间排序
 				let danmakuArray = [];
