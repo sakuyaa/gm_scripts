@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/bangumi/play/ep*
-// @version		2018.8.9
+// @version		2018.8.24
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -25,7 +25,18 @@
 		});
 	};
 	
-	let node, view, download, downloadAll;
+	let node;
+	let view = document.createElement('a');
+	let download = document.createElement('a');
+	let downloadAll = document.createElement('a');
+	view.setAttribute('target', '_blank');
+	view.textContent = '查看弹幕';
+	download.textContent = '下载弹幕';
+	downloadAll.textContent = '全弹幕下载';
+	view.style.color = '#999';
+	download.style.color = '#999';
+	downloadAll.style.color = '#999';
+	
 	let danmakuFunc = () => {
 		view.setAttribute('href', `https://comment.bilibili.com/${window.cid}.xml`);
 
@@ -154,20 +165,13 @@
 	};
 	
 	let code = setInterval(() => {
-		view = document.createElement('a');
-		view.setAttribute('target', '_blank');
-		view.textContent = '查看弹幕';
-		download = document.createElement('a');
-		download.textContent = '下载弹幕';
-		downloadAll = document.createElement('a');
-		downloadAll.textContent = '全弹幕下载';
 		if (/^https?:\/\/www\.bilibili\.com\/bangumi\/play\/ep.+/i.test(location.href)) {
 			node = document.querySelector('.info-second');
 			view.style.color = '#757575';
 			download.style.color = '#757575';
 			downloadAll.style.color = '#757575';
 		} else {
-			node = document.querySelector('.tminfo');
+			node = document.querySelector('.video-data') || document.querySelector('.tminfo');
 		}
 		if (node) {
 			clearInterval(code);
@@ -180,5 +184,5 @@
 			danmakuFunc();
 			addEventListener('hashchange', danmakuFunc);
 		}
-	}, 1234);
+	}, 2345);
 })();
