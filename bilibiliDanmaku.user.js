@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/bangumi/play/ep*
-// @version		2018.8.24
+// @version		2018.8.28
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -171,7 +171,14 @@
 			download.style.color = '#757575';
 			downloadAll.style.color = '#757575';
 		} else {
-			node = document.querySelector('.video-data') || document.querySelector('.tminfo');
+			node = document.querySelector('.video-data');
+			if (node) {
+				if (node.querySelector('.view').getAttribute('title') == '总播放数--') {
+					return;   //避免信息栏未加载出来时插入链接导致错误
+				}
+			} else {
+				node = document.querySelector('.tminfo');
+			}
 		}
 		if (node) {
 			clearInterval(code);
@@ -184,5 +191,5 @@
 			danmakuFunc();
 			addEventListener('hashchange', danmakuFunc);
 		}
-	}, 2345);
+	}, 1234);
 })();
