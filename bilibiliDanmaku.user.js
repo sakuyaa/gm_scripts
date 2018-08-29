@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/bangumi/play/ep*
-// @version		2018.8.28
+// @version		2018.8.29
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -72,24 +72,22 @@
 					danmakuMap.set(parseInt(match[2]), [parseFloat(match[1]), match[0]]);
 				}
 				//获取视频发布日期
-				let year = 2017, month = 8;   //新API历史弹幕只从2017年8月开始
-				let dateNode = document.querySelector('.tminfo time');
+				let now = new Date();
+				let year = now.getFullYear() - 1, month = now.getMonth() + 1;   //新API历史弹幕最远只能看到1年前
+				let dateNode = document.querySelector('.video-data time') || document.querySelector('.tminfo time');
 				if (dateNode) {
 					let videoDate = new Date(dateNode.textContent);
 					if (!isNaN(videoDate)) {
-						year = videoDate.getFullYear();
-						month = videoDate.getMonth() + 1;
-						if (year < 2017) {
-							year = 2017;
-							month = 8;
-						} else if (year == 2017 && month < 8) {
-							month = 8;
+						if (videoDate.getFullYear() > year) {
+							year = videoDate.getFullYear();
+							month = videoDate.getMonth() + 1;
+						} else if (videoDate.getFullYear() == year && videoDate.getMonth() + 1 > month) {
+							month = videoDate.getMonth();
 						}
 					}
 				}
 				//计算历史月份
 				let monthArray = [];
-				let now = new Date();
 				while (year * 100 + month <= now.getFullYear() * 100 + now.getMonth() + 1) {
 					monthArray.push(`https://api.bilibili.com/x/v2/dm/history/index?type=1&oid=${window.cid}&month=${year + '-' + ('0' + month).substr(-2)}`);
 					if (++month > 12) {
