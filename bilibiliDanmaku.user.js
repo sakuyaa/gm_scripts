@@ -6,8 +6,8 @@
 // @description	在哔哩哔哩视频标题下方增加弹幕查看和下载
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
-// @include		http*://www.bilibili.com/bangumi/play/ep*
-// @version		2018.8.29
+// @include		http*://www.bilibili.com/bangumi/play/*
+// @version		2018.9.1
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -163,7 +163,7 @@
 	};
 	
 	let code = setInterval(() => {
-		if (/^https?:\/\/www\.bilibili\.com\/bangumi\/play\/ep.+/i.test(location.href)) {
+		if (/^https?:\/\/www\.bilibili\.com\/bangumi\/play\/.+/i.test(location.href)) {
 			node = document.querySelector('.info-second');
 			view.style.color = '#757575';
 			download.style.color = '#757575';
@@ -178,7 +178,7 @@
 				node = document.querySelector('.tminfo');
 			}
 		}
-		if (node) {
+		if (node && window.cid) {
 			clearInterval(code);
 			node.appendChild(document.createTextNode(' | '));
 			node.appendChild(view);
