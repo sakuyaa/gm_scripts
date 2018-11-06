@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2018.9.1
+// @version		2018.11.6
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -27,18 +27,49 @@
 	
 	let node;
 	let view = document.createElement('a');
+	let subtitle = document.createElement('a');
 	let download = document.createElement('a');
 	let downloadAll = document.createElement('a');
 	view.setAttribute('target', '_blank');
 	view.textContent = '查看弹幕';
+	subtitle.textContent = '下载字幕';
 	download.textContent = '下载弹幕';
 	downloadAll.textContent = '全弹幕下载';
 	view.style.color = '#999';
+	subtitle.style.color = '#999';
 	download.style.color = '#999';
 	downloadAll.style.color = '#999';
 	
 	let danmakuFunc = () => {
 		view.setAttribute('href', `https://comment.bilibili.com/${window.cid}.xml`);
+		
+		subtitle.setAttribute('href', 'javascript:;');
+		subtitle.onclick = () => {
+			let index = window.nc.indexOf('<subtitle>'), index2 = window.nc.indexOf('</subtitle>');
+			if (index >= 0) {
+				let subtitleUrl = window.nc.substring(index + 10, index2);
+				try {
+					let aLink = document.createElement('a');
+					for (let subtitle of JSON.parse(subtitleUrl).subtitles) {
+						let xhr = new XMLHttpRequest();
+						xhr.responseType = 'blob';
+						xhr.open('GET', `https:${subtitle.subtitle_url}`);
+						xhr.onload = () => {
+							if (xhr.status == 200) {
+								aLink.setAttribute('download', subtitle.subtitle_url.substring(subtitle.subtitle_url.lastIndexOf('/') + 1));
+								aLink.setAttribute('href', URL.createObjectURL(xhr.response));
+								aLink.dispatchEvent(new MouseEvent('click'));
+							} else {
+								console.log(new Error(xhr.statusText));
+							}
+						};
+						xhr.send(null);
+					}
+				} catch(e) {
+					alert(e);
+				}
+			}
+		};
 
 		download.removeAttribute('download');
 		download.setAttribute('href', 'javascript:;');
@@ -166,6 +197,7 @@
 		if (/^https?:\/\/www\.bilibili\.com\/bangumi\/play\/.+/i.test(location.href)) {
 			node = document.querySelector('.info-second');
 			view.style.color = '#757575';
+			subtitle.style.color = '#757575';
 			download.style.color = '#757575';
 			downloadAll.style.color = '#757575';
 		} else {
@@ -182,6 +214,8 @@
 			clearInterval(code);
 			node.appendChild(document.createTextNode(' | '));
 			node.appendChild(view);
+			node.appendChild(document.createTextNode(' | '));
+			node.appendChild(subtitle);
 			node.appendChild(document.createTextNode(' | '));
 			node.appendChild(download);
 			node.appendChild(document.createTextNode(' | '));
