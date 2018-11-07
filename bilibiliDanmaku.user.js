@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2018.11.6
+// @version		2018.11.7
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -222,6 +222,16 @@
 			node.appendChild(downloadAll);
 			danmakuFunc();
 			addEventListener('hashchange', danmakuFunc);
+			(history => {
+				let pushState = history.pushState;
+				history.pushState = state => {
+					if (typeof history.onpushstate == 'function') {
+						history.onpushstate({state: state});
+					}
+					danmakuFunc();
+					return pushState.apply(history, arguments);
+				}
+			})(window.history);
 		}
 	}, 1234);
 })();
