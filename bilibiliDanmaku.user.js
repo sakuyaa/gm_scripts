@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2018.11.7
+// @version		2018.12.25
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -45,9 +45,9 @@
 		
 		subtitle.setAttribute('href', 'javascript:;');
 		subtitle.onclick = () => {
-			let index = window.nc.indexOf('<subtitle>'), index2 = window.nc.indexOf('</subtitle>');
+			let index = window.$c.indexOf('<subtitle>'), index2 = window.$c.indexOf('</subtitle>');
 			if (index >= 0) {
-				let subtitleUrl = window.nc.substring(index + 10, index2);
+				let subtitleUrl = window.$c.substring(index + 10, index2);
 				try {
 					let aLink = document.createElement('a');
 					for (let subtitle of JSON.parse(subtitleUrl).subtitles) {
