@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2018.12.25
+// @version		2019.1.2
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -45,28 +45,33 @@
 		
 		subtitle.setAttribute('href', 'javascript:;');
 		subtitle.onclick = () => {
-			let index = window.$c.indexOf('<subtitle>'), index2 = window.$c.indexOf('</subtitle>');
-			if (index >= 0) {
-				let subtitleUrl = window.$c.substring(index + 10, index2);
-				try {
-					let aLink = document.createElement('a');
-					for (let subtitle of JSON.parse(subtitleUrl).subtitles) {
-						let xhr = new XMLHttpRequest();
-						xhr.responseType = 'blob';
-						xhr.open('GET', `https:${subtitle.subtitle_url}`);
-						xhr.onload = () => {
-							if (xhr.status == 200) {
-								aLink.setAttribute('download', subtitle.subtitle_url.substring(subtitle.subtitle_url.lastIndexOf('/') + 1));
-								aLink.setAttribute('href', URL.createObjectURL(xhr.response));
-								aLink.dispatchEvent(new MouseEvent('click'));
-							} else {
-								console.log(new Error(xhr.statusText));
+			for (let i in window) {
+				if (typeof window[i] == 'string') {
+					let index = window[i].indexOf('<subtitle>');
+					if (index >= 0) {
+						let subtitleUrl = window.bd.substring(index + 10, window[i].indexOf('</subtitle>'));
+						try {
+							let aLink = document.createElement('a');
+							for (let subtitle of JSON.parse(subtitleUrl).subtitles) {
+								let xhr = new XMLHttpRequest();
+								xhr.responseType = 'blob';
+								xhr.open('GET', `https:${subtitle.subtitle_url}`);
+								xhr.onload = () => {
+									if (xhr.status == 200) {
+										aLink.setAttribute('download', subtitle.subtitle_url.substring(subtitle.subtitle_url.lastIndexOf('/') + 1));
+										aLink.setAttribute('href', URL.createObjectURL(xhr.response));
+										aLink.dispatchEvent(new MouseEvent('click'));
+									} else {
+										console.log(new Error(xhr.statusText));
+									}
+								};
+								xhr.send(null);
 							}
-						};
-						xhr.send(null);
+						} catch(e) {
+							alert(e);
+						}
+						break;
 					}
-				} catch(e) {
-					alert(e);
 				}
 			}
 		};
