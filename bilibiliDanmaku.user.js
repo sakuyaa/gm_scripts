@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2019.1.2
+// @version		2019.1.10
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -49,7 +49,7 @@
 				if (typeof window[i] == 'string') {
 					let index = window[i].indexOf('<subtitle>');
 					if (index >= 0) {
-						let subtitleUrl = window.bd.substring(index + 10, window[i].indexOf('</subtitle>'));
+						let subtitleUrl = window[i].substring(index + 10, window[i].indexOf('</subtitle>'));
 						try {
 							let aLink = document.createElement('a');
 							for (let subtitle of JSON.parse(subtitleUrl).subtitles) {
@@ -206,11 +206,12 @@
 			download.style.color = '#757575';
 			downloadAll.style.color = '#757575';
 		} else {
-			node = document.querySelector('.video-data');
+			node = document.getElementById('viewbox_report');
 			if (node) {
 				if (node.querySelector('.view').getAttribute('title') == '总播放数--') {
 					return;   //避免信息栏未加载出来时插入链接导致错误
 				}
+				node = node.querySelector('.video-data');
 			} else {
 				node = document.querySelector('.tminfo');
 			}
