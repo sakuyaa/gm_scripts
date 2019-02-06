@@ -4,25 +4,26 @@
 // @author		sakuyaa
 // @description	将网页背景色改为护眼灰
 // @include		*
-// @version		2018.1.18
-// @compatible	firefox 22
+// @inject-into	auto
+// @version		2019.2.6
+// @compatible	firefox 44
 // @grant		GM_addStyle
 // @note		配合browser.display.background_color;#DCDCDC使用
 // @run-at		document-end
 // ==/UserScript==
 (function() {
-	var grayValue = 215;
+	let grayValue = 215;
 	
 	function grayElem(elem) {   //将元素变灰
-		var elemStyle = window.getComputedStyle(elem);
+		let elemStyle = window.getComputedStyle(elem);
 		if (!elemStyle) {
 			return;
 		}
-		var rgbaValues = elemStyle.getPropertyValue('background-color').match(/\d+(\.\d+)?/g);
+		let rgbaValues = elemStyle.getPropertyValue('background-color').match(/\d+(\.\d+)?/g);
 		if (rgbaValues) {
-			var red = rgbaValues[0];
-			var green = rgbaValues[1];
-			var blue = rgbaValues[2];
+			let red = rgbaValues[0];
+			let green = rgbaValues[1];
+			let blue = rgbaValues[2];
 			if (red < grayValue || green < grayValue || blue < grayValue) {
 				return;
 			}
@@ -43,15 +44,15 @@
 	}
 
 	function grayBackgroundColor() {
-		for (var elem of document.getElementsByTagName('*')) {
+		for (let elem of document.getElementsByTagName('*')) {
 			grayElem(elem);
 		}
-		(new window.MutationObserver(mutations => {
-			for (var mutation of mutations) {
-				for (var elem of mutation.addedNodes) {
+		(new MutationObserver(mutations => {
+			for (let mutation of mutations) {
+				for (let elem of mutation.addedNodes) {
 					if (elem.nodeType == 1) {   //元素节点
 						grayElem(elem);
-						for (var childNode of elem.getElementsByTagName('*')) {   //遍历所有子节点
+						for (let childNode of elem.getElementsByTagName('*')) {   //遍历所有子节点
 							grayElem(childNode);
 						}
 					}
@@ -69,7 +70,7 @@
 			GM_addStyle('#wrapper {background: #dcdcdc none !important;}');
 			return;
 		}
-		var herf = window.location.href;
+		let herf = window.location.href;
 		if (/^https?:\/\/tieba\.baidu\.com\/f.+/i.test(herf)) {
 			GM_addStyle('.forum_content {background: #dcdcdc none !important;}');
 		}
