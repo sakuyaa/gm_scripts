@@ -5,7 +5,7 @@
 // @description	将网页背景色改为护眼灰
 // @include		*
 // @inject-into	auto
-// @version		2019.2.6
+// @version		2019.10.22
 // @compatible	firefox 44
 // @grant		GM_addStyle
 // @note		配合browser.display.background_color;#DCDCDC使用
@@ -21,25 +21,16 @@
 		}
 		let rgbaValues = elemStyle.getPropertyValue('background-color').match(/\d+(\.\d+)?/g);
 		if (rgbaValues) {
-			let red = rgbaValues[0];
-			let green = rgbaValues[1];
-			let blue = rgbaValues[2];
+			let [red, green, blue, alpha] = rgbaValues;
 			if (red < grayValue || green < grayValue || blue < grayValue) {
 				return;
 			}
 			//从215-255压缩到215-225
-			if (rgbaValues[3]) {   //有alpha值
-				elem.style.backgroundColor = 'rgba( ' +
-					Math.floor((red - grayValue) / 4 + grayValue) + ', ' +
-					Math.floor((green - grayValue) / 4 + grayValue) + ', ' +
-					Math.floor((blue - grayValue) / 4 + grayValue) + ', ' +
-					rgbaValues[3] + ')';
-			} else {
-				elem.style.backgroundColor = 'rgb( ' +
-					Math.floor((red - grayValue) / 4 + grayValue) + ', ' +
-					Math.floor((green - grayValue) / 4 + grayValue) + ', ' +
-					Math.floor((blue - grayValue) / 4 + grayValue) + ')';
-			}
+			elem.style.setProperty('background-color', (alpha ? 'rgba(' : 'rgb(') +
+				Math.floor((red - grayValue) / 4 + grayValue) + ', ' +
+				Math.floor((green - grayValue) / 4 + grayValue) + ', ' +
+				Math.floor((blue - grayValue) / 4 + grayValue) +
+				(alpha ? (', ' + alpha + ')') : ')'), 'important');
 		}
 	}
 
