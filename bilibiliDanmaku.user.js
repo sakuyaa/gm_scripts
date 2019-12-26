@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2019.1.10
+// @version		2019.12.26
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -198,14 +198,12 @@
 		};
 	};
 	
+	let span = document.createElement('span');
 	let code = setInterval(() => {
 		if (/^https?:\/\/www\.bilibili\.com\/bangumi\/play\/.+/i.test(location.href)) {
-			node = document.querySelector('.info-second');
-			view.style.color = '#757575';
-			subtitle.style.color = '#757575';
-			download.style.color = '#757575';
-			downloadAll.style.color = '#757575';
+			node = document.querySelector('.media-right');
 		} else {
+			span.style.marginLeft = '16px';
 			node = document.getElementById('viewbox_report');
 			if (node) {
 				if (node.querySelector('.view').getAttribute('title') == '总播放数--') {
@@ -218,14 +216,14 @@
 		}
 		if (node && window.cid) {
 			clearInterval(code);
-			node.appendChild(document.createTextNode(' | '));
-			node.appendChild(view);
-			node.appendChild(document.createTextNode(' | '));
-			node.appendChild(subtitle);
-			node.appendChild(document.createTextNode(' | '));
-			node.appendChild(download);
-			node.appendChild(document.createTextNode(' | '));
-			node.appendChild(downloadAll);
+			span.appendChild(view);
+			span.appendChild(document.createTextNode(' | '));
+			span.appendChild(subtitle);
+			span.appendChild(document.createTextNode(' | '));
+			span.appendChild(download);
+			span.appendChild(document.createTextNode(' | '));
+			span.appendChild(downloadAll);
+			node.appendChild(span);
 			danmakuFunc();
 			addEventListener('hashchange', danmakuFunc);
 			(history => {
