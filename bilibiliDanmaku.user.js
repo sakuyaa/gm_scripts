@@ -5,9 +5,9 @@
 // @author		sakuyaa
 // @description	在哔哩哔哩视频标题下方增加弹幕查看和下载
 // @include		http*://www.bilibili.com/video/av*
-// @include		http*://www.bilibili.com/watchlater/#/av*
+// @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2019.12.26
+// @version		2019.12.30
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
