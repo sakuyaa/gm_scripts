@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2019.12.30
+// @version		2020.2.5
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -206,7 +206,7 @@
 			span.style.marginLeft = '16px';
 			node = document.getElementById('viewbox_report');
 			if (node) {
-				if (node.querySelector('.view').getAttribute('title') == '总播放数--') {
+				if (node.querySelector('.dm').getAttribute('title') == '历史累计弹幕数--') {
 					return;   //避免信息栏未加载出来时插入链接导致错误
 				}
 				node = node.querySelector('.video-data');
