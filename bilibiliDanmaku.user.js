@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.2.5
+// @version		2020.2.6
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -23,6 +23,16 @@
 			}
 			throw new Error('bilibiliDanmaku，无法加载弹幕：' + url);
 		});
+	};
+	let fetchPubDate = async aid => {
+		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?aid=${aid}`, true);
+		if (response && response.data && response.data.pubdate) {
+			let pubDate = new Date(response.data.pubdate * 1000);
+			if (!isNaN(pubDate)) {
+				return pubDate;
+			}
+		}
+		return null;
 	};
 	
 	let node;
@@ -109,19 +119,22 @@
 				}
 				//获取视频发布日期
 				let now = new Date();
-				let year = now.getFullYear() - 1, month = now.getMonth() + 1;   //新API历史弹幕最远只能看到1年前
-				let dateNode = document.querySelector('.video-data time') || document.querySelector('.tminfo time');
+				let pubDate, year, month;
+				let dateNode = document.querySelector('.video-data span:nth-child(2)');
 				if (dateNode) {
-					let videoDate = new Date(dateNode.textContent);
-					if (!isNaN(videoDate)) {
-						if (videoDate.getFullYear() > year) {
-							year = videoDate.getFullYear();
-							month = videoDate.getMonth() + 1;
-						} else if (videoDate.getFullYear() == year && videoDate.getMonth() + 1 > month) {
-							month = videoDate.getMonth();
-						}
+					pubDate = new Date(dateNode.textContent);
+					if (isNaN(pubDate)) {
+						pubDate = await fetchPubDate(window.aid);
 					}
+				} else {
+					pubDate = await fetchPubDate(window.aid);
 				}
+				if (!pubDate) {
+					alert('获取视频投稿时间失败！');
+					return;
+				}
+				year = pubDate.getFullYear();
+				month = pubDate.getMonth() + 1;
 				//计算历史月份
 				let monthArray = [];
 				while (year * 100 + month <= now.getFullYear() * 100 + now.getMonth() + 1) {
