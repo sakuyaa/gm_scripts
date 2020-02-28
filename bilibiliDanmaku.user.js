@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.2.28
+// @version		2020.2.28.1
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -215,6 +215,9 @@
 	let code = setInterval(() => {
 		if (/^https?:\/\/www\.bilibili\.com\/bangumi\/play\/.+/i.test(location.href)) {
 			node = document.querySelector('.media-right');
+			if (node && node.querySelector('.media-count').textContent.indexOf('弹幕') == -1) {
+				return;   //避免信息栏未加载出来时插入链接导致错误
+			}
 		} else {
 			span.style.marginLeft = '16px';
 			node = document.getElementById('viewbox_report');
