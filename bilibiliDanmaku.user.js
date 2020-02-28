@@ -7,7 +7,7 @@
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.2.6
+// @version		2020.2.28
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -242,11 +242,13 @@
 			(history => {
 				let pushState = history.pushState;
 				history.pushState = state => {
-					if (typeof history.onpushstate == 'function') {
-						history.onpushstate({state: state});
-					}
 					danmakuFunc();
 					return pushState.apply(history, arguments);
+				}
+				let replaceState = history.replaceState;
+				history.replaceState = state => {
+					danmakuFunc();
+					return replaceState.apply(history, arguments);
 				}
 			})(window.history);
 		}
