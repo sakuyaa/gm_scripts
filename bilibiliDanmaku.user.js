@@ -8,12 +8,25 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.3.23
+// @version		2020.4.1
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
 // ==/UserScript==
 (function() {
+	//拦截pushState和replaceState事件
+	let historyFunc = type => {
+		let origin = history[type];
+		return function() {
+			let e = new Event(type);
+			e.arguments = arguments;
+			window.dispatchEvent(e);
+			return origin.apply(history, arguments);
+		};
+	};
+	history.pushState = historyFunc('pushState');
+	history.replaceState = historyFunc('replaceState');
+	
 	let sleep = time => {
 		return new Promise(resolve => setTimeout(resolve, time));
 	};
@@ -243,18 +256,8 @@
 			node.appendChild(span);
 			danmakuFunc();
 			addEventListener('hashchange', danmakuFunc);
-			(history => {
-				let pushState = history.pushState;
-				history.pushState = state => {
-					danmakuFunc();
-					return pushState.apply(history, arguments);
-				}
-				let replaceState = history.replaceState;
-				history.replaceState = state => {
-					danmakuFunc();
-					return replaceState.apply(history, arguments);
-				}
-			})(window.history);
+			addEventListener('pushState', danmakuFunc);
+			addEventListener('replaceState', danmakuFunc);
 		}
 	}, 1234);
 })();
