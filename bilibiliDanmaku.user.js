@@ -8,12 +8,14 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.4.1
+// @version		2020.4.2
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
 // ==/UserScript==
 (function() {
+	let view, subtitle, download, downloadAll;
+	
 	//拦截pushState和replaceState事件
 	let historyFunc = type => {
 		let origin = history[type];
@@ -48,21 +50,6 @@
 		}
 		return null;
 	};
-	
-	let node;
-	let view = document.createElement('a');
-	let subtitle = document.createElement('a');
-	let download = document.createElement('a');
-	let downloadAll = document.createElement('a');
-	view.setAttribute('target', '_blank');
-	view.textContent = '查看弹幕';
-	subtitle.textContent = '下载字幕';
-	download.textContent = '下载弹幕';
-	downloadAll.textContent = '全弹幕下载';
-	view.style.color = '#999';
-	subtitle.style.color = '#999';
-	download.style.color = '#999';
-	downloadAll.style.color = '#999';
 	
 	let danmakuFunc = () => {
 		view.setAttribute('href', `https://comment.bilibili.com/${window.cid}.xml`);
@@ -225,39 +212,76 @@
 		};
 	};
 	
-	let span = document.createElement('span');
-	let code = setInterval(() => {
-		if (/^https?:\/\/www\.bilibili\.com\/bangumi\/play\/.+/i.test(location.href)) {
+	let findInsertPos = () => {
+		let node;
+		if (location.href.indexOf('www.bilibili.com/bangumi/play') > 0) {   //番剧
 			node = document.querySelector('.media-right');
 			if (node && node.querySelector('.media-count').textContent.indexOf('弹幕') == -1) {
-				return;   //避免信息栏未加载出来时插入链接导致错误
+				return null;   //避免信息栏未加载出来时插入链接导致错误
+			}
+		} else if (location.href.indexOf('www.bilibili.com/watchlater') > 0) {   //稍后再看
+			node = document.querySelector('.tminfo');
+			if (node) {
+				node.lastElementChild.style.marginRight = '32px';
 			}
 		} else {
-			span.style.marginLeft = '16px';
 			node = document.getElementById('viewbox_report');
 			if (node) {
 				if (node.querySelector('.dm').getAttribute('title') == '历史累计弹幕数--') {
-					return;   //避免信息栏未加载出来时插入链接导致错误
+					return null;   //避免信息栏未加载出来时插入链接导致错误
 				}
 				node = node.querySelector('.video-data');
-			} else {
-				node = document.querySelector('.tminfo');
+				node.lastElementChild.style.marginRight = '16px';
 			}
 		}
-		if (node && window.cid) {
-			clearInterval(code);
-			span.appendChild(view);
-			span.appendChild(document.createTextNode(' | '));
-			span.appendChild(subtitle);
-			span.appendChild(document.createTextNode(' | '));
-			span.appendChild(download);
-			span.appendChild(document.createTextNode(' | '));
-			span.appendChild(downloadAll);
-			node.appendChild(span);
-			danmakuFunc();
-			addEventListener('hashchange', danmakuFunc);
-			addEventListener('pushState', danmakuFunc);
-			addEventListener('replaceState', danmakuFunc);
-		}
-	}, 1234);
+		return node;
+	};
+	let createNode = () => {
+		view = document.createElement('a');
+		subtitle = document.createElement('a');
+		download = document.createElement('a');
+		downloadAll = document.createElement('a');
+		view.setAttribute('target', '_blank');
+		view.textContent = '查看弹幕';
+		subtitle.textContent = '下载字幕';
+		download.textContent = '下载弹幕';
+		downloadAll.textContent = '全弹幕下载';
+		view.style.color = '#999';
+		subtitle.style.color = '#999';
+		download.style.color = '#999';
+		downloadAll.style.color = '#999';
+		let span = document.createElement('span');
+		span.id = 'bilibiliDanmaku';
+		span.appendChild(view);
+		span.appendChild(document.createTextNode(' | '));
+		span.appendChild(subtitle);
+		span.appendChild(document.createTextNode(' | '));
+		span.appendChild(download);
+		span.appendChild(document.createTextNode(' | '));
+		span.appendChild(downloadAll);
+		return span;
+	};
+	let insertNode = () => {
+		let code = setInterval(() => {
+			if (!window.cid) {
+				return;
+			}
+			if (document.getElementById('bilibiliDanmaku')) {   //节点已存在
+				clearInterval(code);
+				danmakuFunc();
+			} else {
+				let node = findInsertPos();
+				if (node) {
+					clearInterval(code);
+					node.appendChild(createNode());
+					danmakuFunc();
+				}
+			}
+		}, 1234);
+	};
+	
+	insertNode();
+	addEventListener('hashchange', insertNode);
+	addEventListener('pushState', insertNode);
+	addEventListener('replaceState', insertNode);
 })();
