@@ -8,7 +8,7 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.4.2
+// @version		2020.4.3
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -63,7 +63,12 @@
 						let subtitleUrl = window[i].substring(index + 10, window[i].indexOf('</subtitle>'));
 						try {
 							let aLink = document.createElement('a');
-							for (let subtitle of JSON.parse(subtitleUrl).subtitles) {
+							let subtitles = JSON.parse(subtitleUrl).subtitles;
+							if (subtitles.length == 0) {
+								alert('该视频没有CC字幕');
+								break;
+							}
+							for (let subtitle of subtitles) {
 								let xhr = new XMLHttpRequest();
 								xhr.responseType = 'blob';
 								xhr.open('GET', `https:${subtitle.subtitle_url}`);
