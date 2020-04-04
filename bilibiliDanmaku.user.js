@@ -8,7 +8,7 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.4.3
+// @version		2020.4.4
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -57,38 +57,40 @@
 		subtitle.setAttribute('href', 'javascript:;');
 		subtitle.onclick = () => {
 			for (let i in window) {
-				if (typeof window[i] == 'string') {
-					let index = window[i].indexOf('<subtitle>');
-					if (index >= 0) {
-						let subtitleUrl = window[i].substring(index + 10, window[i].indexOf('</subtitle>'));
-						try {
-							let aLink = document.createElement('a');
-							let subtitles = JSON.parse(subtitleUrl).subtitles;
-							if (subtitles.length == 0) {
-								alert('该视频没有CC字幕');
-								break;
-							}
-							for (let subtitle of subtitles) {
-								let xhr = new XMLHttpRequest();
-								xhr.responseType = 'blob';
-								xhr.open('GET', `https:${subtitle.subtitle_url}`);
-								xhr.onload = () => {
-									if (xhr.status == 200) {
-										aLink.setAttribute('download', subtitle.subtitle_url.substring(subtitle.subtitle_url.lastIndexOf('/') + 1));
-										aLink.setAttribute('href', URL.createObjectURL(xhr.response));
-										aLink.dispatchEvent(new MouseEvent('click'));
-									} else {
-										console.log(new Error(xhr.statusText));
-									}
-								};
-								xhr.send(null);
-							}
-						} catch(e) {
-							alert(e);
-						}
+				if (typeof window[i] != 'string') {
+					continue;
+				}
+				let index = window[i].indexOf('<subtitle>');
+				if (index < 0) {
+					continue;
+				}
+				let subtitleUrl = window[i].substring(index + 10, window[i].indexOf('</subtitle>'));
+				try {
+					let aLink = document.createElement('a');
+					let subtitles = JSON.parse(subtitleUrl).subtitles;
+					if (subtitles.length == 0) {
+						alert('该视频没有CC字幕');
 						break;
 					}
+					for (let subtitle of subtitles) {
+						let xhr = new XMLHttpRequest();
+						xhr.responseType = 'blob';
+						xhr.open('GET', `https:${subtitle.subtitle_url}`);
+						xhr.onload = () => {
+							if (xhr.status == 200) {
+								aLink.setAttribute('download', subtitle.lan + '_' + document.title.split('_')[0] + '.json');
+								aLink.setAttribute('href', URL.createObjectURL(xhr.response));
+								aLink.dispatchEvent(new MouseEvent('click'));
+							} else {
+								console.log(new Error(xhr.statusText));
+							}
+						};
+						xhr.send(null);
+					}
+				} catch(e) {
+					alert(e);
 				}
+				break;
 			}
 		};
 
