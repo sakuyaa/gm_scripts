@@ -8,7 +8,7 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.4.13
+// @version		2020.4.13.1
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -196,7 +196,8 @@
 			try {
 				subtitle_list = JSON.parse(subtitleUrl).subtitles;
 			} catch(e) {
-				alert(e);
+				console.log(e);
+				subtitle_list = await fetchSubtitles();
 			}
 		} else {
 			subtitle_list = await fetchSubtitles();
