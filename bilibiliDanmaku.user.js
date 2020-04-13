@@ -8,7 +8,7 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.4.4
+// @version		2020.4.13
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -40,8 +40,9 @@
 			throw new Error('bilibiliDanmaku，无法加载弹幕：' + url);
 		});
 	};
-	let fetchPubDate = async aid => {
-		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?aid=${aid}`, true);
+	//获取视频发布日期
+	let fetchPubDate = async () => {
+		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?bvid=${window.bvid}`, true);
 		if (response && response.data && response.data.pubdate) {
 			let pubDate = new Date(response.data.pubdate * 1000);
 			if (!isNaN(pubDate)) {
@@ -50,50 +51,19 @@
 		}
 		return null;
 	};
+	//获取CC字幕列表
+	let fetchSubtitles = async () => {
+		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?bvid=${window.bvid}`, true);
+		if (response && response.data && response.data.subtitle) {
+			return subtitle.list;
+		}
+		return null;
+	};
 	
-	let danmakuFunc = () => {
+	let danmakuFunc = async () => {
+		//查看弹幕
 		view.setAttribute('href', `https://comment.bilibili.com/${window.cid}.xml`);
-		
-		subtitle.setAttribute('href', 'javascript:;');
-		subtitle.onclick = () => {
-			for (let i in window) {
-				if (typeof window[i] != 'string') {
-					continue;
-				}
-				let index = window[i].indexOf('<subtitle>');
-				if (index < 0) {
-					continue;
-				}
-				let subtitleUrl = window[i].substring(index + 10, window[i].indexOf('</subtitle>'));
-				try {
-					let aLink = document.createElement('a');
-					let subtitles = JSON.parse(subtitleUrl).subtitles;
-					if (subtitles.length == 0) {
-						alert('该视频没有CC字幕');
-						break;
-					}
-					for (let subtitle of subtitles) {
-						let xhr = new XMLHttpRequest();
-						xhr.responseType = 'blob';
-						xhr.open('GET', `https:${subtitle.subtitle_url}`);
-						xhr.onload = () => {
-							if (xhr.status == 200) {
-								aLink.setAttribute('download', subtitle.lan + '_' + document.title.split('_')[0] + '.json');
-								aLink.setAttribute('href', URL.createObjectURL(xhr.response));
-								aLink.dispatchEvent(new MouseEvent('click'));
-							} else {
-								console.log(new Error(xhr.statusText));
-							}
-						};
-						xhr.send(null);
-					}
-				} catch(e) {
-					alert(e);
-				}
-				break;
-			}
-		};
-
+		//下载弹幕
 		download.removeAttribute('download');
 		download.setAttribute('href', 'javascript:;');
 		download.onclick = () => {
@@ -112,7 +82,7 @@
 			};
 			xhr.send(null);
 		};
-		
+		//全弹幕下载
 		downloadAll.removeAttribute('download');
 		downloadAll.setAttribute('href', 'javascript:;');
 		downloadAll.onclick = async () => {
@@ -132,10 +102,10 @@
 				if (dateNode) {
 					pubDate = new Date(dateNode.textContent);
 					if (isNaN(pubDate)) {
-						pubDate = await fetchPubDate(window.aid);
+						pubDate = await fetchPubDate();
 					}
 				} else {
-					pubDate = await fetchPubDate(window.aid);
+					pubDate = await fetchPubDate();
 				}
 				if (!pubDate) {
 					alert('获取视频投稿时间失败！');
@@ -217,6 +187,45 @@
 				alert(e);
 			}
 		};
+		
+		//下载CC字幕
+		subtitle.setAttribute('href', 'javascript:;');
+		let subtitle_list = [];
+		if (window.eventLogText) {
+			let subtitleUrl = window.eventLogText.substring(window.eventLogText.indexOf('<subtitle>') + 10, window.eventLogText.indexOf('</subtitle>'));
+			try {
+				subtitle_list = JSON.parse(subtitleUrl).subtitles;
+			} catch(e) {
+				alert(e);
+			}
+		} else {
+			subtitle_list = await fetchSubtitles();
+		}
+		if (subtitle_list.length == 0) {   //没有CC字幕则隐藏相关按钮
+			subtitle.setAttribute('hidden', 'hidden');
+			subtitle.onclick = null;
+			return;
+		} else {
+			subtitle.removeAttribute('hidden');
+		}
+		subtitle.onclick = async () => {
+			let aLink = document.createElement('a');
+			for (let sub of subtitle_list) {
+				let xhr = new XMLHttpRequest();
+				xhr.responseType = 'blob';
+				xhr.open('GET', `https:${sub.subtitle_url}`);
+				xhr.onload = () => {
+					if (xhr.status == 200) {
+						aLink.setAttribute('download', sub.lan + '_' + document.title.split('_')[0] + '.json');
+						aLink.setAttribute('href', URL.createObjectURL(xhr.response));
+						aLink.dispatchEvent(new MouseEvent('click'));
+					} else {
+						console.log(new Error(xhr.statusText));
+					}
+				};
+				xhr.send(null);
+			}
+		};
 	};
 	
 	let findInsertPos = () => {
@@ -245,27 +254,27 @@
 	};
 	let createNode = () => {
 		view = document.createElement('a');
-		subtitle = document.createElement('a');
 		download = document.createElement('a');
 		downloadAll = document.createElement('a');
+		subtitle = document.createElement('a');
 		view.setAttribute('target', '_blank');
 		view.textContent = '查看弹幕';
-		subtitle.textContent = '下载字幕';
 		download.textContent = '下载弹幕';
 		downloadAll.textContent = '全弹幕下载';
+		subtitle.textContent = '下载CC字幕';
 		view.style.color = '#999';
-		subtitle.style.color = '#999';
 		download.style.color = '#999';
 		downloadAll.style.color = '#999';
+		downloadAll.style.marginRight = '16px';   //弹幕与字幕功能分开
+		subtitle.style.color = '#999';
 		let span = document.createElement('span');
 		span.id = 'bilibiliDanmaku';
 		span.appendChild(view);
 		span.appendChild(document.createTextNode(' | '));
-		span.appendChild(subtitle);
-		span.appendChild(document.createTextNode(' | '));
 		span.appendChild(download);
 		span.appendChild(document.createTextNode(' | '));
 		span.appendChild(downloadAll);
+		span.appendChild(subtitle);
 		return span;
 	};
 	let insertNode = () => {
