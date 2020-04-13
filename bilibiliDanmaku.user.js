@@ -8,7 +8,7 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.4.13.1
+// @version		2020.4.14
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -43,7 +43,7 @@
 	//获取视频发布日期
 	let fetchPubDate = async () => {
 		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?bvid=${window.bvid}`, true);
-		if (response && response.data && response.data.pubdate) {
+		if (response.data.pubdate) {
 			let pubDate = new Date(response.data.pubdate * 1000);
 			if (!isNaN(pubDate)) {
 				return pubDate;
@@ -54,10 +54,10 @@
 	//获取CC字幕列表
 	let fetchSubtitles = async () => {
 		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?bvid=${window.bvid}`, true);
-		if (response && response.data && response.data.subtitle) {
-			return subtitle.list;
+		if (response.data.subtitle.list) {
+			return response.data.subtitle.list;
 		}
-		return null;
+		return [];
 	};
 	
 	let danmakuFunc = async () => {
@@ -214,7 +214,7 @@
 			for (let sub of subtitle_list) {
 				let xhr = new XMLHttpRequest();
 				xhr.responseType = 'blob';
-				xhr.open('GET', `https:${sub.subtitle_url}`);
+				xhr.open('GET', sub.subtitle_url.replace(/^http:/,''));   //避免混合内容
 				xhr.onload = () => {
 					if (xhr.status == 200) {
 						aLink.setAttribute('download', sub.lan + '_' + document.title.split('_')[0] + '.json');
