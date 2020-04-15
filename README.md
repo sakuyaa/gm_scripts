@@ -1,12 +1,11 @@
 # gm_scripts by sakuyaa
 
 ## [bilibiliDanmaku.user.js](https://github.com/sakuyaa/gm_scripts/raw/master/bilibiliDanmaku.user.js)
-在哔哩哔哩视频标题下方增加弹幕查看和下载
+在哔哩哔哩视频标题下方增加弹幕查看、下载和全弹幕下载功能，提供CC字幕原生下载/转换成SRT字幕下载
 
-**由于哔哩哔哩网站弹幕接口改版，新的API存在以下限制：**
+**哔哩哔哩网站弹幕接口API存在以下限制：**
 * 全弹幕下载需要用户登录
-* ~~历史弹幕最早从2017年8月开始~~
-* 获取速度过快会导致失败，故全弹幕下载需要有获取间隔，导致该功能需要很长很长时间进行弹幕获取
+* 由于网站API限制，连续使用全弹幕下载可能会提示API调用过于频繁，如果出现这种情况请过一段时间后再下载
 
 ## [grayBackgroundColor.user.js](https://github.com/sakuyaa/gm_scripts/raw/master/grayBackgroundColor.user.js)
 将网页背景色改为护眼灰，需要配合`browser.display.background_color;#DCDCDC`使用
