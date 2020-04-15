@@ -8,13 +8,13 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.4.14
+// @version		2020.4.15
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
 // ==/UserScript==
 (function() {
-	let view, subtitle, download, downloadAll;
+	let view, download, downloadAll, subSpan, downloadSub, convertSub;
 	
 	//拦截pushState和replaceState事件
 	let historyFunc = type => {
@@ -32,17 +32,28 @@
 	let sleep = time => {
 		return new Promise(resolve => setTimeout(resolve, time));
 	};
-	let fetchFunc = (url, json) => {
-		return fetch(url, {credentials: 'include'}).then(response => {
-			if (response.ok) {
-				return json ? response.json(): response.text();
+	let fetchFunc = (url, type) => {
+		let init = {};
+		if (url.indexOf('.bilibili.com/') > 0) {
+			init.credentials = 'include';
+		}
+		return fetch(url, init).then(response => {
+			if (!response.ok) {
+				throw new Error(`bilibiliDanmaku：${response.status} ${response.statusText}\n无法加载：${url}`);
 			}
-			throw new Error('bilibiliDanmaku，无法加载弹幕：' + url);
+			switch (type) {
+			case 'blob':
+				return response.blob();
+			case 'json':
+				return response.json();
+			default:
+				return response.text();
+			}
 		});
 	};
 	//获取视频发布日期
 	let fetchPubDate = async () => {
-		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?bvid=${window.bvid}`, true);
+		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?bvid=${window.bvid}`, 'json');
 		if (response.data.pubdate) {
 			let pubDate = new Date(response.data.pubdate * 1000);
 			if (!isNaN(pubDate)) {
@@ -53,12 +64,29 @@
 	};
 	//获取CC字幕列表
 	let fetchSubtitles = async () => {
-		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?bvid=${window.bvid}`, true);
+		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?bvid=${window.bvid}`, 'json');
 		if (response.data.subtitle.list) {
 			return response.data.subtitle.list;
 		}
 		return [];
 	};
+	//秒转化为时分秒
+	let formatSeconds = seconds => {
+		let h = Math.floor(seconds / 3600);
+		if (h < 10) {
+			h = '0' + h;
+		}
+		let m = Math.floor((seconds / 60 % 60));
+		if (m < 10) {
+			m = '0' + m;
+		}
+		let s = Math.floor((seconds % 60));
+		if (s < 10) {
+			s = '0' + s;
+		}
+		let ms = '00' + Math.floor(seconds * 1000 % 1000);
+		return `${h}:${m}:${s}.${ms.substr(-3)}`;
+	}
 	
 	let danmakuFunc = async () => {
 		//查看弹幕
@@ -66,21 +94,12 @@
 		//下载弹幕
 		download.removeAttribute('download');
 		download.setAttribute('href', 'javascript:;');
-		download.onclick = () => {
-			let xhr = new XMLHttpRequest();
-			xhr.responseType = 'blob';
-			xhr.open('GET', `https://comment.bilibili.com/${window.cid}.xml?bilibiliDanmaku`);
-			xhr.onload = () => {
-				if (xhr.status == 200) {
-					download.onclick = null;
-					download.setAttribute('download', document.title.split('_')[0] + '.xml');
-					download.setAttribute('href', URL.createObjectURL(xhr.response));
-					download.dispatchEvent(new MouseEvent('click'));
-				} else {
-					console.log(new Error(xhr.statusText));
-				}
-			};
-			xhr.send(null);
+		download.onclick = async () => {
+			let danmaku = await fetchFunc(`https://api.bilibili.com/x/v1/dm/list.so?oid=${window.cid}&bilibiliDanmaku=1`, 'blob');
+			download.onclick = null;
+			download.setAttribute('download', document.title.split('_')[0] + '.xml');
+			download.setAttribute('href', URL.createObjectURL(danmaku));
+			download.dispatchEvent(new MouseEvent('click'));
 		};
 		//全弹幕下载
 		downloadAll.removeAttribute('download');
@@ -144,7 +163,7 @@
 				//获取历史弹幕日期
 				let data;
 				for (let i = 0; i < monthArray.length;) {
-					data = await fetchFunc(monthArray[i], true);
+					data = await fetchFunc(monthArray[i], 'json');
 					if (data.code) {
 						throw new Error('bilibiliDanmaku，API接口返回错误：' + data.message);
 					}
@@ -188,43 +207,50 @@
 			}
 		};
 		
-		//下载CC字幕
-		subtitle.setAttribute('href', 'javascript:;');
-		let subtitle_list = [];
+		//获取CC字幕列表
+		downloadSub.setAttribute('href', 'javascript:;');
+		let subList = [];
 		if (window.eventLogText) {
-			let subtitleUrl = window.eventLogText.substring(window.eventLogText.indexOf('<subtitle>') + 10, window.eventLogText.indexOf('</subtitle>'));
 			try {
-				subtitle_list = JSON.parse(subtitleUrl).subtitles;
+				subList = JSON.parse(window.eventLogText.substring(window.eventLogText.indexOf('<subtitle>') + 10,
+					window.eventLogText.indexOf('</subtitle>'))).subtitles;
 			} catch(e) {
 				console.log(e);
-				subtitle_list = await fetchSubtitles();
+				subList = await fetchSubtitles();
 			}
 		} else {
-			subtitle_list = await fetchSubtitles();
+			subList = await fetchSubtitles();
 		}
-		if (subtitle_list.length == 0) {   //没有CC字幕则隐藏相关按钮
-			subtitle.setAttribute('hidden', 'hidden');
-			subtitle.onclick = null;
+		if (subList.length == 0) {   //没有CC字幕则隐藏相关按钮
+			subSpan.setAttribute('hidden', 'hidden');
+			downloadSub.onclick = null;
+			convertSub.onclick = null;
 			return;
 		} else {
-			subtitle.removeAttribute('hidden');
+			subSpan.removeAttribute('hidden');
 		}
-		subtitle.onclick = async () => {
+		//下载CC字幕
+		downloadSub.onclick = async () => {
 			let aLink = document.createElement('a');
-			for (let sub of subtitle_list) {
-				let xhr = new XMLHttpRequest();
-				xhr.responseType = 'blob';
-				xhr.open('GET', sub.subtitle_url.replace(/^http:/,''));   //避免混合内容
-				xhr.onload = () => {
-					if (xhr.status == 200) {
-						aLink.setAttribute('download', sub.lan + '_' + document.title.split('_')[0] + '.json');
-						aLink.setAttribute('href', URL.createObjectURL(xhr.response));
-						aLink.dispatchEvent(new MouseEvent('click'));
-					} else {
-						console.log(new Error(xhr.statusText));
-					}
-				};
-				xhr.send(null);
+			for (let sub of subList) {
+				let subtitle = await fetchFunc(sub.subtitle_url.replace(/^http:/, ''), 'blob');   //避免混合内容
+				aLink.setAttribute('download', sub.lan + '_' + document.title.split('_')[0] + '.json');
+				aLink.setAttribute('href', URL.createObjectURL(subtitle));
+				aLink.dispatchEvent(new MouseEvent('click'));
+			}
+		};
+		//生成SRT字幕
+		convertSub.onclick = async () => {
+			let aLink = document.createElement('a');
+			for (let sub of subList) {
+				let subtitle = await fetchFunc(sub.subtitle_url.replace(/^http:/, ''), 'json');   //避免混合内容
+				let srt = '', index = 0;
+				for (let content of subtitle.body) {
+					srt += `${index++}\n${formatSeconds(content.from)} --> ${formatSeconds(content.to)}\n${content.content.replace(/\n/g,'<br>')}\n\n`;
+				}
+				aLink.setAttribute('download', sub.lan + '_' + document.title.split('_')[0] + '.srt');
+				aLink.setAttribute('href', URL.createObjectURL(new Blob([srt])));
+				aLink.dispatchEvent(new MouseEvent('click'));
 			}
 		};
 	};
@@ -257,17 +283,19 @@
 		view = document.createElement('a');
 		download = document.createElement('a');
 		downloadAll = document.createElement('a');
-		subtitle = document.createElement('a');
+		downloadSub = document.createElement('a');
+		convertSub = document.createElement('a');
 		view.setAttribute('target', '_blank');
 		view.textContent = '查看弹幕';
 		download.textContent = '下载弹幕';
 		downloadAll.textContent = '全弹幕下载';
-		subtitle.textContent = '下载CC字幕';
+		downloadSub.textContent = '下载CC字幕';
+		convertSub.textContent = '生成SRT字幕';
 		view.style.color = '#999';
 		download.style.color = '#999';
 		downloadAll.style.color = '#999';
-		downloadAll.style.marginRight = '16px';   //弹幕与字幕功能分开
-		subtitle.style.color = '#999';
+		downloadSub.style.color = '#999';
+		convertSub.style.color = '#999';
 		let span = document.createElement('span');
 		span.id = 'bilibiliDanmaku';
 		span.appendChild(view);
@@ -275,7 +303,12 @@
 		span.appendChild(download);
 		span.appendChild(document.createTextNode(' | '));
 		span.appendChild(downloadAll);
-		span.appendChild(subtitle);
+		subSpan = document.createElement('span');
+		subSpan.style.marginLeft = '16px';   //弹幕与字幕功能分开
+		subSpan.appendChild(downloadSub);
+		subSpan.appendChild(document.createTextNode(' | '));
+		subSpan.appendChild(convertSub);
+		span.appendChild(subSpan);
 		return span;
 	};
 	let insertNode = () => {
