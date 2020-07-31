@@ -8,7 +8,7 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.4.15
+// @version		2020.7.31
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -323,8 +323,10 @@
 				let node = findInsertPos();
 				if (node) {
 					clearInterval(code);
-					node.appendChild(createNode());
-					danmakuFunc();
+					setTimeout(() => {   //延时加载
+						node.appendChild(createNode());
+						danmakuFunc();
+					}, 1234);
 				}
 			}
 		}, 1234);
