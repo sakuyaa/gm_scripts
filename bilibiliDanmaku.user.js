@@ -8,7 +8,7 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.7.31
+// @version		2020.7.31.1
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -270,7 +270,7 @@
 		} else {
 			node = document.getElementById('viewbox_report');
 			if (node) {
-				if (node.querySelector('.dm').getAttribute('title') == '历史累计弹幕数--') {
+				if (node.querySelector('.dm').getAttribute('title') == '历史累计弹幕数undefined') {
 					return null;   //避免信息栏未加载出来时插入链接导致错误
 				}
 				node = node.querySelector('.video-data');
@@ -323,10 +323,8 @@
 				let node = findInsertPos();
 				if (node) {
 					clearInterval(code);
-					setTimeout(() => {   //延时加载
-						node.appendChild(createNode());
-						danmakuFunc();
-					}, 1234);
+					node.appendChild(createNode());
+					danmakuFunc();
 				}
 			}
 		}, 1234);
