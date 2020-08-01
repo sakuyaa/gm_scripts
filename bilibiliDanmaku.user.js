@@ -8,7 +8,7 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.7.31.1
+// @version		2020.8.1
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -304,6 +304,7 @@
 		span.appendChild(document.createTextNode(' | '));
 		span.appendChild(downloadAll);
 		subSpan = document.createElement('span');
+		subSpan.setAttribute('hidden', 'hidden');
 		subSpan.style.marginLeft = '16px';   //弹幕与字幕功能分开
 		subSpan.appendChild(downloadSub);
 		subSpan.appendChild(document.createTextNode(' | '));
