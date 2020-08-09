@@ -8,13 +8,13 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.8.1
+// @version		2020.8.9
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
 // ==/UserScript==
 (function() {
-	let view, download, downloadAll, subSpan, downloadSub, convertSub;
+	let view, download, downloadAll, downloadPast, subSpan, downloadSub, convertSub;
 	
 	//拦截pushState和replaceState事件
 	let historyFunc = type => {
@@ -206,6 +206,31 @@
 				alert(e);
 			}
 		};
+		//历史弹幕下载
+		downloadPast.onclick = async () => {
+			//获取视频发布日期
+			let date;
+			let dateNode = document.querySelector('.video-data span:nth-child(2)');
+			if (dateNode) {
+				date = new Date(dateNode.textContent);
+				if (isNaN(date)) {
+					date = await fetchPubDate();
+				}
+			} else {
+				date = await fetchPubDate();
+			}
+			if (!date) {   //获取视频投稿时间失败，默认设置为当天
+				date = new Date();
+			}
+			if((date = prompt('请按此格式输入想要下载历史弹幕的日期', date.toISOString().split('T')[0])) == null) {
+				return;
+			}
+			let danmaku = await fetchFunc(`https://api.bilibili.com/x/v2/dm/history?type=1&oid=${window.cid}&date=${date}&bilibiliDanmaku=1`);
+			let aLink = document.createElement('a');
+			aLink.setAttribute('download', document.title.split('_')[0] + '_' + date + '.xml');
+			aLink.setAttribute('href', URL.createObjectURL(new Blob([danmaku])));
+			aLink.dispatchEvent(new MouseEvent('click'));
+		};
 		
 		//获取CC字幕列表
 		downloadSub.setAttribute('href', 'javascript:;');
@@ -283,17 +308,20 @@
 		view = document.createElement('a');
 		download = document.createElement('a');
 		downloadAll = document.createElement('a');
+		downloadPast = document.createElement('a');
 		downloadSub = document.createElement('a');
 		convertSub = document.createElement('a');
 		view.setAttribute('target', '_blank');
 		view.textContent = '查看弹幕';
 		download.textContent = '下载弹幕';
 		downloadAll.textContent = '全弹幕下载';
+		downloadPast.textContent = '历史弹幕下载';
 		downloadSub.textContent = '下载CC字幕';
 		convertSub.textContent = '生成SRT字幕';
 		view.style.color = '#999';
 		download.style.color = '#999';
 		downloadAll.style.color = '#999';
+		downloadPast.style.color = '#999';
 		downloadSub.style.color = '#999';
 		convertSub.style.color = '#999';
 		let span = document.createElement('span');
@@ -303,6 +331,8 @@
 		span.appendChild(download);
 		span.appendChild(document.createTextNode(' | '));
 		span.appendChild(downloadAll);
+		span.appendChild(document.createTextNode(' | '));
+		span.appendChild(downloadPast);
 		subSpan = document.createElement('span');
 		subSpan.setAttribute('hidden', 'hidden');
 		subSpan.style.marginLeft = '16px';   //弹幕与字幕功能分开
