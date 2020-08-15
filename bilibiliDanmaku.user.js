@@ -8,7 +8,7 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.8.9
+// @version		2020.8.15
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -222,7 +222,7 @@
 			if (!date) {   //获取视频投稿时间失败，默认设置为当天
 				date = new Date();
 			}
-			if((date = prompt('请按此格式输入想要下载历史弹幕的日期', date.toISOString().split('T')[0])) == null) {
+			if((date = prompt('请按此格式输入想要下载历史弹幕的日期',  date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).substr(-2) + '-' + ('0' + date.getDate()).substr(-2))) == null) {
 				return;
 			}
 			let danmaku = await fetchFunc(`https://api.bilibili.com/x/v2/dm/history?type=1&oid=${window.cid}&date=${date}&bilibiliDanmaku=1`);
