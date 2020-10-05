@@ -8,7 +8,7 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.8.15
+// @version		2020.10.5
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -235,15 +235,23 @@
 		//获取CC字幕列表
 		downloadSub.setAttribute('href', 'javascript:;');
 		let subList = [];
+		let notFound = true;
 		if (window.eventLogText) {
-			try {
-				subList = JSON.parse(window.eventLogText.substring(window.eventLogText.indexOf('<subtitle>') + 10,
-					window.eventLogText.indexOf('</subtitle>'))).subtitles;
-			} catch(e) {
-				console.log(e);
-				subList = await fetchSubtitles();
+			for (let eventLog of window.eventLogText) {
+				if (eventLog.indexOf('<subtitle>') > 0) {
+					notFound = false;
+					try {
+						subList = JSON.parse(eventLog.substring(eventLog.indexOf('<subtitle>') + 10,
+							eventLog.indexOf('</subtitle>'))).subtitles;
+					} catch(e) {
+						console.log(e);
+						notFound = true;
+					}
+					break;
+				}
 			}
-		} else {
+		}
+		if (notFound) {
 			subList = await fetchSubtitles();
 		}
 		if (subList.length == 0) {   //没有CC字幕则隐藏相关按钮
