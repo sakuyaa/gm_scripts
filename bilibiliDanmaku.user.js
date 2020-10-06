@@ -6,9 +6,11 @@
 // @description	在哔哩哔哩视频标题下方增加弹幕查看和下载
 // @include		http*://www.bilibili.com/video/av*
 // @include		http*://www.bilibili.com/video/BV*
-// @include		http*://www.bilibili.com/watchlater/#/*
+// @include		http*://www.bilibili.com/watchlater/#/av*
+// @include		http*://www.bilibili.com/watchlater/#/BV*
+// @include		http*://www.bilibili.com/medialist/play/watchlater/p*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.10.5
+// @version		2020.10.6
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -53,7 +55,7 @@
 	};
 	//获取视频发布日期
 	let fetchPubDate = async () => {
-		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?bvid=${window.bvid}`, 'json');
+		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?${window.bvid ? 'bvid=' + window.bvid : 'aid=' + window.aid}`, 'json');
 		if (response.data.pubdate) {
 			let pubDate = new Date(response.data.pubdate * 1000);
 			if (!isNaN(pubDate)) {
@@ -64,7 +66,7 @@
 	};
 	//获取CC字幕列表
 	let fetchSubtitles = async () => {
-		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?bvid=${window.bvid}`, 'json');
+		let response = await fetchFunc(`https://api.bilibili.com/x/web-interface/view?${window.bvid ? 'bvid=' + window.bvid : 'aid=' + window.aid}`, 'json');
 		if (response.data.subtitle.list) {
 			return response.data.subtitle.list;
 		}
@@ -300,6 +302,19 @@
 			if (node) {
 				node.lastElementChild.style.marginRight = '32px';
 			}
+		} else if (location.href.indexOf('www.bilibili.com/medialist/play/watchlater') > 0) {   //新的稍后再看页面
+			node = document.querySelector('.play-data');
+			if (node) {
+				node.lastElementChild.style.marginRight = '16px';
+			}
+			//新的稍后再看页面没有aid、bvid、cid，需要特殊处理
+			let videoMessage = window.player.getVideoMessage();
+			if (videoMessage) {
+				window.aid = videoMessage.aid;
+				window.cid = videoMessage.cid;
+			} else {
+				return null;
+			}
 		} else {
 			node = document.getElementById('viewbox_report');
 			if (node) {
@@ -352,7 +367,11 @@
 	};
 	let insertNode = () => {
 		let code = setInterval(() => {
-			if (!window.cid) {
+			if (location.href.indexOf('www.bilibili.com/medialist/play/watchlater') > 0) {
+				if (!window.player) {   //新的稍后再看页面没有cid
+					return;
+				}
+			} else if (!window.cid) {
 				return;
 			}
 			if (document.getElementById('bilibiliDanmaku')) {   //节点已存在
