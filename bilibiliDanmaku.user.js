@@ -10,7 +10,7 @@
 // @include		http*://www.bilibili.com/watchlater/#/BV*
 // @include		http*://www.bilibili.com/medialist/play/watchlater/p*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.10.6
+// @version		2020.10.16
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -239,7 +239,8 @@
 		let subList = [];
 		let notFound = true;
 		if (window.eventLogText) {
-			for (let eventLog of window.eventLogText) {
+			for (let i = window.eventLogText.length - 1; i >= 0; i--) {
+				let eventLog = window.eventLogText[i];
 				if (eventLog.indexOf('<subtitle>') > 0) {
 					notFound = false;
 					try {
