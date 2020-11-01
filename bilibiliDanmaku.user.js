@@ -8,9 +8,9 @@
 // @include		http*://www.bilibili.com/video/BV*
 // @include		http*://www.bilibili.com/watchlater/#/av*
 // @include		http*://www.bilibili.com/watchlater/#/BV*
-// @include		http*://www.bilibili.com/medialist/play/watchlater/p*
+// @include		http*://www.bilibili.com/medialist/play/*/*
 // @include		http*://www.bilibili.com/bangumi/play/*
-// @version		2020.10.16
+// @version		2020.11.1
 // @compatible	firefox 52
 // @grant		none
 // @run-at		document-end
@@ -235,7 +235,6 @@
 		};
 		
 		//获取CC字幕列表
-		downloadSub.setAttribute('href', 'javascript:;');
 		let subList = [];
 		let notFound = true;
 		if (window.eventLogText) {
@@ -303,7 +302,7 @@
 			if (node) {
 				node.lastElementChild.style.marginRight = '32px';
 			}
-		} else if (location.href.indexOf('www.bilibili.com/medialist/play/watchlater') > 0) {   //新的稍后再看页面
+		} else if (location.href.indexOf('www.bilibili.com/medialist/play') > 0) {   //新的稍后再看页面、收藏页面
 			node = document.querySelector('.play-data');
 			if (node) {
 				node.lastElementChild.style.marginRight = '16px';
@@ -319,7 +318,7 @@
 		} else {
 			node = document.getElementById('viewbox_report');
 			if (node) {
-				if (node.querySelector('.dm').getAttribute('title') == '历史累计弹幕数undefined') {
+				if (!document.querySelector('.bilibili-player-video-info-people-number')) {
 					return null;   //避免信息栏未加载出来时插入链接导致错误
 				}
 				node = node.querySelector('.video-data');
@@ -336,6 +335,9 @@
 		downloadSub = document.createElement('a');
 		convertSub = document.createElement('a');
 		view.setAttribute('target', '_blank');
+		downloadPast.setAttribute('href', 'javascript:;');
+		downloadSub.setAttribute('href', 'javascript:;');
+		convertSub.setAttribute('href', 'javascript:;');
 		view.textContent = '查看弹幕';
 		download.textContent = '下载弹幕';
 		downloadAll.textContent = '全弹幕下载';
@@ -368,8 +370,8 @@
 	};
 	let insertNode = () => {
 		let code = setInterval(() => {
-			if (location.href.indexOf('www.bilibili.com/medialist/play/watchlater') > 0) {
-				if (!window.player) {   //新的稍后再看页面没有cid
+			if (location.href.indexOf('www.bilibili.com/medialist/play') > 0) {
+				if (!window.player) {   //新的稍后再看页面、收藏页面没有cid
 					return;
 				}
 			} else if (!window.cid) {
@@ -386,7 +388,7 @@
 					danmakuFunc();
 				}
 			}
-		}, 1234);
+		}, 2196);
 	};
 	
 	insertNode();
