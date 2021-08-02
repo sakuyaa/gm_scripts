@@ -5,8 +5,8 @@
 // @description	将网页背景色改为护眼灰
 // @include		*
 // @inject-into	auto
-// @version		2019.10.22
 // @compatible	firefox 44
+// @version		2021.08.02
 // @grant		GM_addStyle
 // @note		配合browser.display.background_color;#DCDCDC使用
 // @run-at		document-end
@@ -49,7 +49,7 @@
 					}
 				}
 			}
-		})).observe(document, {
+		})).observe(document.body, {
 			childList: true,
 			subtree: true
 		});
@@ -67,6 +67,6 @@
 		}
 	}
 
-	grayBackgroundColor();
+	setTimeout(grayBackgroundColor, 0);
 	fixNotGray();
 })();
