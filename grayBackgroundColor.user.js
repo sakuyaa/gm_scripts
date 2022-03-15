@@ -5,8 +5,8 @@
 // @description	将网页背景色改为护眼灰
 // @include		*
 // @inject-into	auto
-// @compatible	firefox 44
 // @version		2021.08.02
+// @compatible	firefox 74
 // @grant		GM_addStyle
 // @note		配合browser.display.background_color;#DCDCDC使用
 // @run-at		document-end
@@ -15,11 +15,7 @@
 	let grayValue = 215;
 	
 	function grayElem(elem) {   //将元素变灰
-		let elemStyle = window.getComputedStyle(elem);
-		if (!elemStyle) {
-			return;
-		}
-		let rgbaValues = elemStyle.getPropertyValue('background-color').match(/\d+(\.\d+)?/g);
+		let rgbaValues = window.getComputedStyle(elem)?.getPropertyValue('background-color')?.match(/\d+(\.\d+)?/g);
 		if (rgbaValues) {
 			let [red, green, blue, alpha] = rgbaValues;
 			if (red < grayValue || green < grayValue || blue < grayValue) {
