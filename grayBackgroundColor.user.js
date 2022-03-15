@@ -5,7 +5,7 @@
 // @description	将网页背景色改为护眼灰
 // @include		*
 // @inject-into	auto
-// @version		2021.08.02
+// @version		2022.03.15
 // @compatible	firefox 74
 // @grant		GM_addStyle
 // @note		配合browser.display.background_color;#DCDCDC使用
@@ -35,6 +35,7 @@
 			grayElem(elem);
 		}
 		(new MutationObserver(mutations => {
+			sleep(0);
 			for (let mutation of mutations) {
 				for (let elem of mutation.addedNodes) {
 					if (elem.nodeType == 1) {   //元素节点
