@@ -16,7 +16,7 @@
 * 似乎有些网站加载很慢（在加载很多DOM节点），这时候可能会报该脚本可能正忙,或者已停止响应，不知道怎么解决:flushed:
 
 ## [scrollWithMouseMove.user.js](https://github.com/sakuyaa/gm_scripts/raw/master/scrollWithMouseMove.user.js)
-鼠标在滚动条上`按住Ctrl键移至滚动条时才触发`移动即可滚动网页（也只能是网页右侧的滚动条），移动距离即为滚动条移动距离<br />
+鼠标在滚动条上移动即可滚动网页（也只能是网页右侧的滚动条），移动距离即为滚动条移动距离<br />
 `修改自Mozest.com社区的脚本ScrollWithMouse.uc.js`
 
 ## [tiebaSortById.user.js](https://github.com/sakuyaa/gm_scripts/raw/master/tiebaSortById.user.js)
